@@ -1,10 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;NET45;NET47</TargetFrameworks>
         <Configurations>Debug;Release;</Configurations>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>opensource.snk</AssemblyOriginatorKeyFile>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/geeking/Utf8Json</PackageProjectUrl>
+        <PackageId>XUtf8Json</PackageId>
+        <PackageTags>Json, Serialization, Formatter, Serializer, Unity, Xamarin</PackageTags>
+        <Authors>xiaozg</Authors>
+      <Version>2.0.0</Version>
+      <Description>
+        forked from neuecc/Utf8Json. Thanks to Mr. neuecc for the greate project
+        allow string convert to number and revert.
+      </Description>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' AND '$(TargetFramework)'=='NET45'">
