@@ -278,7 +278,15 @@ namespace Utf8Json.Internal.DoubleConversion
             bool nonzero_digit_dropped = false;
 
             bool sign = false;
-
+            var isStringAsDouble = NumberConverter.IsQuotationChar(current.Value);
+            if (isStringAsDouble)
+            {
+                current++;
+                Iterator next_non_space = current;
+                // Skip following spaces (if allowed).
+                if (!AdvanceToNonspace(ref next_non_space, end)) return junk_string_value_;
+                current = next_non_space;
+            }
             if (current == '+' || current == '-')
             {
                 sign = (current == '-');
@@ -348,6 +356,12 @@ namespace Utf8Json.Internal.DoubleConversion
                     processed_characters_count = (current - input);
                     return SignedZero(sign);
                 }
+                if (isStringAsDouble && NumberConverter.IsQuotationChar(current.Value))
+                {
+                    current++;
+                    processed_characters_count = (current - input);
+                    return SignedZero(sign);
+                }
 
                 leading_zero = true;
 
@@ -407,6 +421,10 @@ namespace Utf8Json.Internal.DoubleConversion
                 // octal = octal && *current < '8';
                 current++;
                 if (current == end) goto parsing_done;
+                if (isStringAsDouble && NumberConverter.IsQuotationChar(current.Value))
+                {
+                    goto parsing_done;
+                }
             }
 
             if (significant_digits == 0)
@@ -445,6 +463,12 @@ namespace Utf8Json.Internal.DoubleConversion
                             processed_characters_count = (current - input);
                             return SignedZero(sign);
                         }
+                        if (isStringAsDouble && NumberConverter.IsQuotationChar(current.Value))
+                        {
+                            current++;
+                            processed_characters_count = (current - input);
+                            return SignedZero(sign);
+                        }
                         exponent--;  // Move this 0 into the exponent.
                     }
                 }
@@ -466,6 +490,10 @@ namespace Utf8Json.Internal.DoubleConversion
                     }
                     ++current;
                     if (current == end) goto parsing_done;
+                    if (isStringAsDouble && NumberConverter.IsQuotationChar(current.Value))
+                    {
+                        goto parsing_done;
+                    }
                 }
             }
 
@@ -560,7 +588,9 @@ namespace Utf8Json.Internal.DoubleConversion
                 AdvanceToNonspace(ref current, end);
             }
 
-            parsing_done:
+        parsing_done:
+            if (isStringAsDouble && NumberConverter.IsQuotationChar(current.Value))
+                current++;
             exponent += insignificant_digits;
 
             //if (octal)

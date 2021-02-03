@@ -337,7 +337,7 @@ namespace Utf8Json
                 return false;
             }
 
-            ERROR:
+        ERROR:
             throw CreateParsingException("null");
         }
 
@@ -556,9 +556,18 @@ namespace Utf8Json
             var builderOffset = 0;
             char[] codePointStringBuffer = null;
             var codePointStringOffet = 0;
+            var isNumberAsString = false;
+            if (NumberConverter.IsNumber(bytes[offset])
+                || (bytes[offset] == '-' && NumberConverter.IsNumber(bytes[offset + 1])))
+            {
+                isNumberAsString = true;
+            }
+            if (!isNumberAsString)
+            {
+                if (bytes[offset] != '\"') throw CreateParsingException("String Begin Token");
+                offset++;
+            }
 
-            if (bytes[offset] != '\"') throw CreateParsingException("String Begin Token");
-            offset++;
 
             var from = offset;
 
@@ -633,11 +642,17 @@ namespace Utf8Json
                             builderOffset += StringEncoding.UTF8.GetBytes(codePointStringBuffer, 0, codePointStringOffet, builder, builderOffset);
                             codePointStringOffet = 0;
                         }
+
                         offset++;
+                        if (isNumberAsString && !NumberConverter.IsNumber(bytes[i]) && bytes[i] != '.')
+                        {
+                            offset--;
+                            goto END;
+                        }
                         continue;
                 }
 
-                COPY:
+            COPY:
                 {
                     if (builder == null) builder = StringBuilderCache.GetBuffer();
                     if (codePointStringOffet != 0)
@@ -663,12 +678,15 @@ namespace Utf8Json
             resultOffset = 0;
             throw CreateParsingException("String End Token");
 
-            END:
+        END:
             if (builderOffset == 0 && codePointStringOffet == 0) // no escape
             {
                 resultBytes = bytes;
                 resultOffset = from;
-                resultLength = offset - 1 - from; // skip last quote
+                if (isNumberAsString)
+                    resultLength = offset - from;
+                else
+                    resultLength = offset - 1 - from; // skip last quote
             }
             else
             {
@@ -783,7 +801,7 @@ namespace Utf8Json
                 }
                 throw CreateParsingExceptionMessage("not found end string.");
 
-                OK:
+            OK:
                 key = new ArraySegment<byte>(bytes, from, offset - from - 1); // remove \"
             }
 
@@ -823,9 +841,9 @@ namespace Utf8Json
                 throw CreateParsingException("true | false");
             }
 
-            ERROR_TRUE:
+        ERROR_TRUE:
             throw CreateParsingException("true");
-            ERROR_FALSE:
+        ERROR_FALSE:
             throw CreateParsingException("false");
         }
 
@@ -1032,7 +1050,7 @@ namespace Utf8Json
         {
             var stack = 0;
 
-            AGAIN:
+        AGAIN:
             var token = GetCurrentJsonToken();
             switch (token)
             {
@@ -1180,7 +1198,7 @@ namespace Utf8Json
             }
             offset = bytes.Length;
 
-            END:
+        END:
             return new ArraySegment<byte>(bytes, initialOffset, offset - initialOffset);
         }
 

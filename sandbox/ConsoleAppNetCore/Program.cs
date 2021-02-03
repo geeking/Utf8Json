@@ -271,7 +271,7 @@ namespace ConsoleAppNetCore
                 readSize = 1;
             }
 
-            ERROR:
+        ERROR:
             return 0xFFFD;
         }
 
@@ -355,7 +355,7 @@ namespace ConsoleAppNetCore
         {
 
             var huga = JsonSerializer.Serialize<Card>(new Card());
-            
+
 
         }
 
